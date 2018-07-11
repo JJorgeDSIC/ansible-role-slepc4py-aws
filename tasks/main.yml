@@ -132,7 +132,7 @@
 - name: Adding LD_LIBRARY_PATH in the bashrc files
   lineinfile: 
    dest : "{{ common.project_dir }}/.bashrc"
-   line : export LD_LIBRARY_PATH={{ common.project_dir }}/{{ mpich.name }}/lib:$LD_LIBRARY_PATH
+   line : export LD_LIBRARY_PATH={{ common.project_dir }}/{{ mpich.name }}/:$LD_LIBRARY_PATH
    insertafter: 'EOF' 
    state: present
 - name: Adding PETSC_DIR in the bashrc files
