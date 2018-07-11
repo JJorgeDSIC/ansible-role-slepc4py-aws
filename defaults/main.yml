@@ -1,0 +1,27 @@
+common:
+ project_dir: /home/ubuntu
+mpich:
+ name: mpich-3.2
+ url:  http://www.mpich.org/static/downloads/3.2/mpich-3.2.tar.gz
+ file: mpich-3.2.tar.gz
+ version: 3.2
+petsc:
+ name: petsc-3.8.4
+ url: http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.4.tar.gz
+ file: petsc-3.8.4.tar.gz
+ version: 3.8.4
+petsc4py:
+ name: petsc4py-3.8.0
+ url: https://bitbucket.org/petsc/petsc4py/downloads/petsc4py-3.8.0.tar.gz
+ file: petsc4py-3.8.0.tar.gz
+ version: 3.8.0
+slepc:
+ name: slepc-3.8.3
+ url: http://slepc.upv.es/download/distrib/slepc-3.8.3.tar.gz
+ file: slepc-3.8.3.tar.gz
+ version: 3.8.3
+slepc4py:
+ name: slepc4py-3.8.0
+ url: https://bitbucket.org/slepc/slepc4py/downloads/slepc4py-3.8.0.tar.gz
+ file: slepc4py-3.8.0.tar.gz
+ version: 3.8.0

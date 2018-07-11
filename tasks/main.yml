@@ -1,0 +1,187 @@
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+#####################################
+#  --- Dependencies       --------  #
+#####################################
+- name: Install basic packages
+  apt: 
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - build-essential
+    - valgrind
+    - gfortran
+    - htop
+    - gfortran
+    - cython
+    - libjpeg8-dev
+    - libtiff5-dev
+    - libjasper-dev
+    - libpng12-dev
+    - cmake
+    - pkg-config
+    - git
+    - htop
+    - swig
+    - libcurl3-dev 
+    - nmap
+    - libcr-dev
+- name: Install list of python packages
+  apt: 
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - virtualenvwrapper
+    - python-dev
+    - python-pip
+    - python-setuptools
+    - python-numpy
+    - python-dev
+    - python-pip
+    - python-virtualenv
+    - python-wheel
+    - python-tk
+    - python3-dev
+    - python3-numpy
+    - python3-pip
+    - python3-setuptools
+    - python3-wheel
+    - python3-tk
+- name: Install Numpy
+  pip: 
+   name: numpy 
+   executable: pip3 
+- name: Install Jupyter
+  pip: 
+   name: jupyter 
+   executable: pip3 
+##############################################
+#  --- download binaries (PETSc, SLEPc, ...) #
+##############################################
+- name: Download MPICH
+  get_url: url={{ mpich.url }} dest={{ common.project_dir }}/{{ mpich.file }}
+- name: Download PETSc
+  get_url: url={{ petsc.url }} dest={{ common.project_dir }}/{{ petsc.file }}
+- name: Download SLEPc
+  get_url: url={{ slepc.url }} dest={{ common.project_dir }}/{{ slepc.file }}
+- name: Download PETSc4py
+  get_url: url={{ petsc4py.url }} dest={{ common.project_dir }}/{{ petsc4py.file }}
+- name: Download SLEPc4py
+  get_url: url={{ slepc4py.url }} dest={{ common.project_dir }}/{{ slepc4py.file }}
+- name: Extract MPICH
+  become: true
+  become_method: sudo
+  unarchive: src={{ common.project_dir }}/{{ mpich.file }} dest={{ common.project_dir }} remote_src=yes
+- name: Extract PETSc
+  become: true
+  become_method: sudo
+  unarchive: src={{ common.project_dir }}/{{ petsc.file }} dest={{ common.project_dir }} remote_src=yes
+- name: Extract PETSc4py
+  become: true
+  become_method: sudo
+  unarchive: src={{ common.project_dir }}/{{ petsc4py.file }} dest={{ common.project_dir }} remote_src=yes
+- name: Extract SLEPc
+  become: true
+  become_method: sudo
+  unarchive: src={{ common.project_dir }}/{{ slepc.file }} dest={{ common.project_dir }} remote_src=yes
+- name: Extract SLEPc4py
+  become: true
+  become_method: sudo
+  unarchive: src={{ common.project_dir }}/{{ slepc4py.file }} dest={{ common.project_dir }} remote_src=yes
+##############################################
+#  --- install binaries (PETSc, SLEPc, ...)  #
+##############################################
+- name: Running configure with MPICH
+  shell: ./configure
+  args:
+    chdir: '{{ common.project_dir }}/{{ mpich.name }}'
+- name: Running make with MPICH
+  shell: make
+  args:
+    chdir: '{{ common.project_dir }}/{{ mpich.name }}'
+- name: Running make install with MPICH
+  become: true
+  become_method: sudo
+  shell: make install
+  args:
+    chdir: '{{ common.project_dir }}/{{ mpich.name }}'
+- name: Install MPI4py
+  pip: 
+   name: mpi4py 
+   executable: pip3 
+
+- name: Running configure with PETSc
+  shell: ./configure --with-cc=gcc --with-cxx=g++ --with-fc=0 --download-f2cblaslapack --with-mpi-dir={{ common.project_dir }}/{{ mpich.name }}
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc.name }}'
+- name: Running make with PETSc
+  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug all
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc.name }}'
+- name: Running make test with PETSc
+  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug test
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc.name }}'
+
+- name: Adding LD_LIBRARY_PATH in the bashrc files
+  lineinfile: 
+   dest : "{{ common.project_dir }}/.bashrc"
+   line : export LD_LIBRARY_PATH={{ common.project_dir }}/{{ mpich.name }}/lib:$LD_LIBRARY_PATH
+   insertafter: 'EOF' 
+   state: present
+- name: Adding PETSC_DIR in the bashrc files
+  lineinfile: 
+   dest : "{{ common.project_dir }}/.bashrc"
+   line : export PETSC_DIR={{ common.project_dir }}/{{ petsc.name }}
+   insertafter: 'EOF' 
+   state: present
+- name: Adding PETSC_ARCH in the bashrc files
+  lineinfile: 
+   dest : "{{ common.project_dir }}/.bashrc"
+   line : export PETSC_ARCH=arch-linux2-c-debug
+   insertafter: 'EOF' 
+   state: present
+- name: Adding SLEPC_DIR in the bashrc files
+  lineinfile: 
+   dest : "{{ common.project_dir }}/.bashrc"
+   line : export SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }}
+   insertafter: 'EOF' 
+   state: present
+- name: Running configure with SLEPc
+  shell: PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug ./configure
+  args:
+    chdir: '{{ common.project_dir }}/{{ slepc.name }}'
+- name: Running make with SLEPc
+  shell: make SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug
+  args:
+    chdir: '{{ common.project_dir }}/{{ slepc.name }}'
+#####################################################
+#  --- install python bindings (PETSc, SLEPc, ...)  #
+#####################################################
+- name: Running python build with PETSc4py
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py build
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc4py.name }}'
+- name: Running python install with PETSc4py
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py install
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc4py.name }}'
+- name: Running python build with SLEPc
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py build
+  args:
+    chdir: '{{ common.project_dir }}/{{ slepc4py.name }}'
+- name: Running python install with SLEPc4py
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py install
+  args:
+    chdir: '{{ common.project_dir }}/{{ slepc4py.name }}'
+- name: Cloning repository with SLEPc4py examples
+  git: 
+    repo: 'https://github.com/firedrakeproject/slepc4py.git'
+    dest: "{{ common.project_dir }}/examples"
+    clone: yes
+
