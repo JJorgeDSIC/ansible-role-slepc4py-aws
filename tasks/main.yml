@@ -56,10 +56,11 @@
   pip: 
    name: numpy 
    executable: pip3 
-- name: Install Jupyter
-  pip: 
-   name: jupyter 
-   executable: pip3 
+# This fails...
+# - name: Install Jupyter
+#   pip: 
+#    name: jupyter 
+#    executable: pip3 
 ##############################################
 #  --- download binaries (PETSc, SLEPc, ...) #
 ##############################################
