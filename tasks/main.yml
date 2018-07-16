@@ -124,7 +124,7 @@
 
 - name: Running configure with PETSc
   shell: ./configure --with-cc=gcc --with-cxx=g++ --with-fc=0 --download-f2cblaslapack --with-mpi-dir={{ common.project_dir }}/{{ mpich.name }} --with-debugging=0
-  when: petsc.debug
+  when: not petsc.debug
   args:
     chdir: '{{ common.project_dir }}/{{ petsc.name }}'
 
