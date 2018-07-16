@@ -116,23 +116,31 @@
    name: mpi4py 
    executable: pip3 
 
-- name: Running configure with PETSc
+- name: Running configure with PETSc (Debug)
   shell: ./configure --with-cc=gcc --with-cxx=g++ --with-fc=0 --download-f2cblaslapack --with-mpi-dir={{ common.project_dir }}/{{ mpich.name }}
+  when: petsc.debug
   args:
     chdir: '{{ common.project_dir }}/{{ petsc.name }}'
+
+- name: Running configure with PETSc
+  shell: ./configure --with-cc=gcc --with-cxx=g++ --with-fc=0 --download-f2cblaslapack --with-mpi-dir={{ common.project_dir }}/{{ mpich.name }} --with-debugging=0
+  when: petsc.debug
+  args:
+    chdir: '{{ common.project_dir }}/{{ petsc.name }}'
+
 - name: Running make with PETSc
-  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug all
+  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} all
   args:
     chdir: '{{ common.project_dir }}/{{ petsc.name }}'
 - name: Running make test with PETSc
-  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug test
+  shell: make PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} test
   args:
     chdir: '{{ common.project_dir }}/{{ petsc.name }}'
 
 - name: Adding LD_LIBRARY_PATH in the bashrc files
   lineinfile: 
    dest : "{{ common.project_dir }}/.bashrc"
-   line : export LD_LIBRARY_PATH={{ common.project_dir }}/{{ mpich.name }}/:$LD_LIBRARY_PATH
+   line : export LD_LIBRARY_PATH={{ common.project_dir }}/{{ mpich.name }}/lib/:$LD_LIBRARY_PATH
    insertafter: 'EOF' 
    state: present
 - name: Adding PETSC_DIR in the bashrc files
@@ -144,7 +152,7 @@
 - name: Adding PETSC_ARCH in the bashrc files
   lineinfile: 
    dest : "{{ common.project_dir }}/.bashrc"
-   line : export PETSC_ARCH=arch-linux2-c-debug
+   line : export PETSC_ARCH=arch-linux2-c-{{ pets.mode }}
    insertafter: 'EOF' 
    state: present
 - name: Adding SLEPC_DIR in the bashrc files
@@ -154,30 +162,30 @@
    insertafter: 'EOF' 
    state: present
 - name: Running configure with SLEPc
-  shell: PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug ./configure
+  shell: PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} ./configure
   args:
     chdir: '{{ common.project_dir }}/{{ slepc.name }}'
 - name: Running make with SLEPc
-  shell: make SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug
+  shell: make SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }}
   args:
     chdir: '{{ common.project_dir }}/{{ slepc.name }}'
 #####################################################
 #  --- install python bindings (PETSc, SLEPc, ...)  #
 #####################################################
 - name: Running python build with PETSc4py
-  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py build
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} python3 setup.py build
   args:
     chdir: '{{ common.project_dir }}/{{ petsc4py.name }}'
 - name: Running python install with PETSc4py
-  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py install
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} python3 setup.py install
   args:
     chdir: '{{ common.project_dir }}/{{ petsc4py.name }}'
 - name: Running python build with SLEPc
-  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py build
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} python3 setup.py build
   args:
     chdir: '{{ common.project_dir }}/{{ slepc4py.name }}'
 - name: Running python install with SLEPc4py
-  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-debug python3 setup.py install
+  shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ pets.mode }} python3 setup.py install
   args:
     chdir: '{{ common.project_dir }}/{{ slepc4py.name }}'
 - name: Cloning repository with SLEPc4py examples

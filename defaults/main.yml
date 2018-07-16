@@ -10,6 +10,8 @@ petsc:
  url: http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.4.tar.gz
  file: petsc-3.8.4.tar.gz
  version: 3.8.4
+ mode: opt
+ debug: false
 petsc4py:
  name: petsc4py-3.8.0
  url: https://bitbucket.org/petsc/petsc4py/downloads/petsc4py-3.8.0.tar.gz
@@ -25,3 +27,4 @@ slepc4py:
  url: https://bitbucket.org/slepc/slepc4py/downloads/slepc4py-3.8.0.tar.gz
  file: slepc4py-3.8.0.tar.gz
  version: 3.8.0
+
