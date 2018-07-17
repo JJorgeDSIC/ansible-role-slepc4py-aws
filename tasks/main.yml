@@ -14,7 +14,6 @@
   with_items:
     - build-essential
     - valgrind
-    - gfortran
     - htop
     - gfortran
     - cython
@@ -188,6 +187,9 @@
   shell: SLEPC_DIR={{ common.project_dir }}/{{ slepc.name }} PETSC_DIR={{ common.project_dir }}/{{ petsc.name }} PETSC_ARCH=arch-linux2-c-{{ petsc.mode }} python3 setup.py install
   args:
     chdir: '{{ common.project_dir }}/{{ slepc4py.name }}'
+- name: Running ldconfig to update links to shared libraries
+  become: true
+  shell: ldconfig
 - name: Cloning repository with SLEPc4py examples
   git: 
     repo: 'https://github.com/firedrakeproject/slepc4py.git'
